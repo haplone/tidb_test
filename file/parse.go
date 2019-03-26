@@ -10,6 +10,31 @@ import (
 	"strings"
 )
 
+func ParseDbNames(FoldName, FileName string) []string {
+	var names []string
+
+	f, err := os.Open(fmt.Sprintf("%s/%s", FoldName, FileName))
+	utils.CheckErr(err)
+	buf := bufio.NewReader(f)
+	for {
+		line, err := buf.ReadString('\n')
+
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			utils.CheckErr(err)
+			break
+		}
+
+		line = strings.TrimSpace(line)
+		if len(line) != 0 {
+			names = append(names, line)
+		}
+	}
+	return names
+}
+
 type DbCfg struct {
 	FoldName  string
 	DbName    string

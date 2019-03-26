@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func TestParseDbNames(t *testing.T) {
+	dbs := ParseDbNames("../test_file", "database_list.txt")
+	if len(dbs) != 2 {
+		t.Errorf("parse database list error")
+	}
+}
+
 func NewDb() DbCfg {
 	return NewDbCfg("../test_file", "db1")
 }
