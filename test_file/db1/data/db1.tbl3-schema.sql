@@ -1,0 +1,1 @@
+create table db1.tbl3(id int,name varchar(128));
