@@ -6,9 +6,21 @@ import (
 	"github.com/haplone/tidb_test/utils"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
+
+func GetDbCfgs(FoldName, FileName string) []DbCfg {
+	var dbs []DbCfg
+	dbNames := ParseDbNames(FoldName, FileName)
+
+	for _, n := range dbNames {
+		db := NewDbCfg(FoldName, n)
+		dbs = append(dbs, db)
+	}
+	return dbs
+}
 
 func ParseDbNames(FoldName, FileName string) []string {
 	var names []string
@@ -93,7 +105,7 @@ func (d *DbCfg) parseTblList() {
 
 			tbl := NewTblCfg(d.FoldName, d.DbName, line)
 			tbl.parseCreateTblSql()
-			go tbl.parseSql()
+			//go tbl.parseSql()
 			d.AddTbl(tbl)
 
 			//log.Printf("--: %s", line)
@@ -133,7 +145,7 @@ func (t *TblCfg) parseCreateTblSql() {
 	t.CreateSql = string(s)
 }
 
-func (t *TblCfg) parseSql() {
+func (t *TblCfg) ParseSql() {
 	sqlFile := fmt.Sprintf("%s/", t.GetDbFold())
 	dl, err := ioutil.ReadDir(sqlFile)
 	utils.CheckErr(err)
@@ -157,6 +169,7 @@ func (t *TblCfg) parseSql() {
 
 				if err != nil {
 					if err == io.EOF {
+						log.Printf("`%s`.`%s`[%s] read sql file done(eof)", t.DbName, t.TblName, d.Name())
 						break
 					}
 					utils.CheckErr(err)

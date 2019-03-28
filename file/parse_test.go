@@ -1,13 +1,47 @@
 package file
 
 import (
+	"log"
 	"strings"
 	"testing"
 )
 
+func TestGetDbCfgs(t *testing.T) {
+	dbs := GetDbCfgs("../test_file", "database_list.txt")
+	if len(dbs) != 1 {
+		t.Errorf("parse database list error")
+	}
+	for _, db := range dbs {
+		db.parseTblList()
+		for _, tbl := range db.Tbls {
+			tt := tbl
+			go tt.ParseSql()
+			consumeSql(tt)
+		}
+	}
+	//t.Error("==")
+}
+
+func consumeSql(tbl TblCfg) {
+	log.Printf("tbl[`%s`.`%s`]: start", tbl.DbName, tbl.TblName)
+	for {
+		select {
+		case sql := <-tbl.SqlCh:
+			if strings.EqualFold(sql, "") {
+				log.Printf("tbl[`%s`.`%s`]: over", tbl.DbName, tbl.TblName)
+				return
+			}
+			log.Printf("tbl[`%s`.`%s`]: %s", tbl.DbName, tbl.TblName, sql)
+			//default:
+			//	return
+		}
+	}
+	return
+}
+
 func TestParseDbNames(t *testing.T) {
 	dbs := ParseDbNames("../test_file", "database_list.txt")
-	if len(dbs) != 2 {
+	if len(dbs) != 1 {
 		t.Errorf("parse database list error")
 	}
 }
@@ -26,11 +60,11 @@ func TestDbCfg_parseTblList(t *testing.T) {
 	if len(db.Tbls) != 3 {
 		t.Errorf("parse tbls error")
 	}
-	for _, tbl := range db.Tbls {
-		select {
-		case <-tbl.SqlCh:
-		}
-	}
+	//for _, tbl := range db.Tbls {
+	//	select {
+	//	case <-tbl.SqlCh:
+	//	}
+	//}
 }
 
 func TestDbCfg_parseCreateDbSql(t *testing.T) {
