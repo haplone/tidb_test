@@ -62,11 +62,13 @@ func NewDbCfg(FoldName, DbName string) DbCfg {
 }
 
 func (d *DbCfg) AddTbl(t TblCfg) {
+	log.Printf("%s add tbl %s", t.DbName, t.TblName)
 	d.Tbls = append(d.Tbls, t)
 }
 
 func (d *DbCfg) Parse() {
-
+	d.parseCreateDbSql()
+	d.parseTblList()
 }
 
 func (d *DbCfg) GetDbFold() string {
