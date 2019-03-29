@@ -170,14 +170,16 @@ func (t *TblCfg) ParseSql() {
 			var sql string
 			for {
 				line, err := buf.ReadString('\n')
-				utils.CheckErr(err)
+				//utils.CheckErr(err)
 				//log.Printf("--sql: %s", line)
 
-				if !strings.HasPrefix(line, "INSERT") {
-					sql = sql + line
+				if strings.HasPrefix(strings.ToUpper(line), "INSERT") {
+					if len(sql) > 0 {
+						t.SqlCh <- sql
+					}
+					sql = line
 				} else {
-					t.SqlCh <- sql
-					sql = ""
+					sql = sql + line
 				}
 
 				if err != nil {
