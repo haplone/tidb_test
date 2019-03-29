@@ -166,14 +166,25 @@ func (t *TblCfg) ParseSql() {
 			sf, err := os.Open(fmt.Sprintf("%s/%s", t.GetDbFold(), d.Name()))
 			utils.CheckErr(err)
 			buf := bufio.NewReader(sf)
+
+			var sql string
 			for {
 				line, err := buf.ReadString('\n')
 				utils.CheckErr(err)
 				//log.Printf("--sql: %s", line)
-				t.SqlCh <- line
+
+				if !strings.HasPrefix(line, "INSERT") {
+					sql = sql + line
+				} else {
+					t.SqlCh <- sql
+					sql = ""
+				}
 
 				if err != nil {
 					if err == io.EOF {
+						if len(sql) > 0 {
+							t.SqlCh <- sql
+						}
 						log.Printf("`%s`.`%s`[%s] read sql file done(eof)", t.DbName, t.TblName, d.Name())
 						break
 					}
