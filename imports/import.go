@@ -73,8 +73,12 @@ func (i *ImportJob) importTbl(tbl file.TblCfg) {
 	}()
 	log.Printf("`%s`.`%s` start to  consume and send to mysql", tbl.DbName, tbl.TblName)
 	cl := mysql.GetMysql(i.Dest.GetConnStr())
-	_, err := cl.Exec(tbl.CreateSql)
+
+	_, err := cl.Exec(fmt.Sprintf("use %s;", tbl.DbName))
 	utils.CheckErr(err)
+
+	_, err = cl.Exec(tbl.CreateSql)
+	utils.CheckSqlErr(err, tbl.CreateSql)
 
 	go tbl.ParseSql()
 
@@ -90,7 +94,7 @@ func (i *ImportJob) importTbl(tbl file.TblCfg) {
 			if count%i.LogSize == 0 {
 				log.Printf("exec %d sqls for `%s`.`%s`,like %s", count, tbl.DbName, tbl.TblName, sql)
 			}
-			utils.CheckErr(err)
+			utils.CheckSqlErr(err, sql)
 		}
 	}
 }

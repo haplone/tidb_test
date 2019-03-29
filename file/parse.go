@@ -39,6 +39,9 @@ func ParseDbNames(FoldName, FileName string) []string {
 			break
 		}
 
+		if strings.Contains(line, ",") {
+			line = strings.Split(line, ",")[0]
+		}
 		line = strings.TrimSpace(line)
 		if len(line) != 0 {
 			names = append(names, line)

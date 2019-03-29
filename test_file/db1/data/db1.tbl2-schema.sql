@@ -1,1 +1,1 @@
-create table db1.tbl2(id int,name varchar(128));
+create table tbl2(id int,name varchar(128));
